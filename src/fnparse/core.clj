@@ -73,3 +73,12 @@
       (if (= (type result) ParseSuccess)
         result
         (->ParseSuccess nil position)))))
+
+(defn regex [regexp]
+  (fn [target position]
+    (let [target' (.substring target position)
+          matches (re-find (re-pattern regexp) target')
+          result (if (coll? matches) (first matches) matches)]
+      (if result
+        (->ParseSuccess result (+ position (count result)))
+        (->ParseFailure nil position)))))

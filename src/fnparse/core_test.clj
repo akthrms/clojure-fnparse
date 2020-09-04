@@ -47,4 +47,11 @@
     (t/is (= (parse "hoge" 0) (f/->ParseSuccess "hoge" 4)))
     (t/is (= (parse "fuga" 0) (f/->ParseSuccess nil 0)))))
 
+(t/deftest regex
+  (let [parse (f/regex "hoge")]
+    (t/is (= (parse "hoge" 0) (f/->ParseSuccess "hoge" 4))))
+  (let [parse (f/regex "([1-9][0-9]*)")]
+    (t/is (= (parse "2014" 0) (f/->ParseSuccess "2014" 4)))
+    (t/is (= (parse "01" 0) (f/->ParseSuccess "1" 1)))))
+
 (t/run-tests)
