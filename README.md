@@ -7,12 +7,12 @@ Clojure製のパーサコンビネータ
 - token
 - many
 - choice
-- seqs
+- p-seq
 - option
 - regex
-- lazy (**TODO**)
-- map-parse
-- ch
+- lazy
+- p-map
+- p-char
 
 ## 参考
 

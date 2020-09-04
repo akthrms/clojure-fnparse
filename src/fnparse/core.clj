@@ -4,30 +4,17 @@
 
 (defrecord ParseFailure [result new-position])
 
-(defn- substring [s start end]
-  (let [len (count s)]
-    (.substring s start (if (< len end) len end))))
+(defn- substring [string start end]
+  (let [len (count string)]
+    (.substring string start (if (< len end) len end))))
 
-(defn parse-hoge [target position]
-  (if (= (substring target position (+ position 4)) "hoge")
-    (->ParseSuccess "hoge" (+ position 4))
-    (->ParseFailure nil position)))
-
-(defn token [s]
-  (let [len (count s)]
+(defn token [string]
+  (let [len (count string)]
     (fn [target position]
       (let [end (+ position len)]
-        (if (= (substring target position end) s)
-          (->ParseSuccess s end)
+        (if (= (substring target position end) string)
+          (->ParseSuccess string end)
           (->ParseFailure nil position))))))
-
-(defn parse-hoge-many [target position]
-  (loop [result []
-         position' position]
-    (let [end (+ position' 4)]
-      (if (= (substring target position' end) "hoge")
-        (recur (conj result "hoge") end)
-        (->ParseSuccess result position')))))
 
 (defn many [parser]
   (fn [target position]
@@ -37,12 +24,6 @@
         (if (= (type result') ParseSuccess)
           (recur (conj result (:result result')) (:new-position result'))
           (->ParseSuccess result position'))))))
-
-(defn parse-foo-or-bar [target position]
-  (case (substring target position (+ position 3))
-    "foo" (->ParseSuccess "foo" (+ position 3))
-    "bar" (->ParseSuccess "bar" (+ position 3))
-    (->ParseFailure nil position)))
 
 (defn choice [& parsers]
   (fn [target position]
@@ -54,7 +35,7 @@
         (first successes)
         (->ParseFailure nil position)))))
 
-(defn seqs [& parsers]
+(defn p-seq [& parsers]
   (fn [target position]
     (let [position' (atom position)
           successes (for [parser parsers
@@ -80,25 +61,28 @@
           regexp' (if (= (.substring regexp 0 1) "^") regexp (str "^" regexp))
           matches (re-find (re-pattern regexp') target')
           result (if (coll? matches) (first matches) matches)]
-      (if result
+      (if (not-empty result)
         (->ParseSuccess result (+ position (count result)))
         (->ParseFailure nil position)))))
 
-(defn lazy [])
+(defn lazy [func]
+  (fn [target position]
+    (let [parser (func)]
+      (parser target position))))
 
-(defn map-parse [parser f]
+(defn p-map [parser func]
   (fn [target position]
     (let [result (parser target position)]
       (if (= (type result) ParseSuccess)
-        (->ParseSuccess (f (:result result)) (:new-position result))
+        (->ParseSuccess (func (:result result)) (:new-position result))
         (->ParseFailure nil position)))))
 
-(defn- find-first [pred coll]
-  (first (drop-while (complement pred) coll)))
+(defn- find-first [func coll]
+  (first (drop-while (complement func) coll)))
 
-(defn ch [str]
+(defn p-char [string]
   (fn [target position]
     (let [result (substring target position (+ position 1))]
-      (if (find-first #(= (first result) (second %)) (map-indexed list str))
+      (if (find-first #(= (first result) (second %)) (map-indexed list string))
         (->ParseSuccess result (+ position 1))
         (->ParseFailure nil position)))))
