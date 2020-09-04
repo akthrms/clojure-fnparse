@@ -4,11 +4,8 @@ Clojure製のパーサコンビネータ
 
 ## 機能
 
-- parse-hoge
 - token
-- parse-hoge-many
 - many
-- parse-foo-or-bar
 - choice
 - seqs
 - option
