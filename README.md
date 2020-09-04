@@ -11,6 +11,7 @@ Clojure製のパーサコンビネータ
 - option
 - regex
 - lazy (**TODO**)
+- map-parse
 
 ## 参考
 

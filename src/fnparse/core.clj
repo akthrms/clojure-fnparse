@@ -82,3 +82,12 @@
       (if result
         (->ParseSuccess result (+ position (count result)))
         (->ParseFailure nil position)))))
+
+(defn lazy [])
+
+(defn map-parse [parser f]
+  (fn [target position]
+    (let [result (parser target position)]
+      (if (= (type result) ParseSuccess)
+        (->ParseSuccess (f (:result result)) (:new-position result))
+        (->ParseFailure nil position)))))

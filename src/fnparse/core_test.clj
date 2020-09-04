@@ -54,4 +54,9 @@
     (t/is (= (parse "2014" 0) (f/->ParseSuccess "2014" 4)))
     (t/is (= (parse "01" 0) (f/->ParseSuccess "1" 1)))))
 
+(t/deftest map-parse
+  (let [parse (f/map-parse (f/token "hello") #(str % "という文字をパースできたよ"))]
+    (t/is (= (parse "hello" 0) (f/->ParseSuccess "helloという文字をパースできたよ" 5)))
+    (t/is (= (parse "foobar" 0) (f/->ParseFailure nil 0)))))
+
 (t/run-tests)
