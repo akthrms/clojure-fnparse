@@ -12,6 +12,7 @@ Clojure製のパーサコンビネータ
 - regex
 - lazy (**TODO**)
 - map-parse
+- ch
 
 ## 参考
 

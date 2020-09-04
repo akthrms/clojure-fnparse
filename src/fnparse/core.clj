@@ -4,7 +4,7 @@
 
 (defrecord ParseFailure [result new-position])
 
-(defn substring [s start end]
+(defn- substring [s start end]
   (let [len (count s)]
     (.substring s start (if (< len end) len end))))
 
@@ -77,7 +77,8 @@
 (defn regex [regexp]
   (fn [target position]
     (let [target' (.substring target position)
-          matches (re-find (re-pattern regexp) target')
+          regexp' (if (= (.substring regexp 0 1) "^") regexp (str "^" regexp))
+          matches (re-find (re-pattern regexp') target')
           result (if (coll? matches) (first matches) matches)]
       (if result
         (->ParseSuccess result (+ position (count result)))
@@ -90,4 +91,14 @@
     (let [result (parser target position)]
       (if (= (type result) ParseSuccess)
         (->ParseSuccess (f (:result result)) (:new-position result))
+        (->ParseFailure nil position)))))
+
+(defn- find-first [pred coll]
+  (first (drop-while (complement pred) coll)))
+
+(defn ch [str]
+  (fn [target position]
+    (let [result (substring target position (+ position 1))]
+      (if (find-first #(= (first result) (second %)) (map-indexed list str))
+        (->ParseSuccess result (+ position 1))
         (->ParseFailure nil position)))))
