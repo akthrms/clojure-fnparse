@@ -1,5 +1,5 @@
 (ns core
-  (:import [fnparse.core ParseSuccess])
+  (:import [fnparse.core ParseFailure])
   (:require [fnparse.core :refer :all]))
 
 (def fp-number (fp-map (fp-regex "\\d*") #(Integer/parseInt % 10)))
@@ -19,6 +19,7 @@
 
 (defn -main [target & _]
   (let [result (fp-expression target 0)]
-    (if (= (type result) ParseSuccess)
-      (println (:result result))
-      (println (str (+ (:new-position result) 1) "文字目でパース失敗")))))
+    (cond
+      (= (type result) ParseFailure) (println "パースに失敗しました")
+      (not= (count target) (:new-position result)) (println (str (inc (:new-position result)) "文字目でパースに失敗しました"))
+      :else (println (:result result)))))
