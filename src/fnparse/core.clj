@@ -2,7 +2,7 @@
 
 (defrecord ParseSuccess [result new-position])
 
-(defrecord ParseFailure [result new-position])
+(defrecord ParseFailure [new-position])
 
 (defn- substring [string start end]
   (let [len (count string)]
@@ -14,7 +14,7 @@
       (let [end (+ position len)]
         (if (= (substring target position end) string)
           (->ParseSuccess string end)
-          (->ParseFailure nil position))))))
+          (->ParseFailure position))))))
 
 (defn fp-many [parser]
   (fn [target position]
@@ -33,7 +33,7 @@
                       result)]
       (if (< 0 (count successes))
         (first successes)
-        (->ParseFailure nil position)))))
+        (->ParseFailure position)))))
 
 (defn fp-seq [& parsers]
   (fn [target position]
@@ -46,7 +46,7 @@
                         result))]
       (if (= (count parsers) (count successes))
         (->ParseSuccess (map :result successes) (last (map :new-position successes)))
-        (->ParseFailure nil position)))))
+        (->ParseFailure position)))))
 
 (defn fp-option [parser]
   (fn [target position]
@@ -63,7 +63,7 @@
           result (if (coll? matches) (first matches) matches)]
       (if (not-empty result)
         (->ParseSuccess result (+ position (count result)))
-        (->ParseFailure nil position)))))
+        (->ParseFailure position)))))
 
 (defn fp-lazy [func]
   (fn [target position]
@@ -75,7 +75,7 @@
     (let [result (parser target position)]
       (if (= (type result) ParseSuccess)
         (->ParseSuccess (func (:result result)) (:new-position result))
-        (->ParseFailure nil position)))))
+        (->ParseFailure position)))))
 
 (defn- find-first [func coll]
   (first (drop-while (complement func) coll)))
@@ -85,4 +85,4 @@
     (let [result (substring target position (+ position 1))]
       (if (find-first #(= (first result) (second %)) (map-indexed list string))
         (->ParseSuccess result (+ position 1))
-        (->ParseFailure nil position)))))
+        (->ParseFailure position)))))
