@@ -8,7 +8,7 @@
   (let [len (count string)]
     (.substring string start (if (< len end) len end))))
 
-(defn token [string]
+(defn p-token [string]
   (let [len (count string)]
     (fn [target position]
       (let [end (+ position len)]
@@ -16,7 +16,7 @@
           (->ParseSuccess string end)
           (->ParseFailure nil position))))))
 
-(defn many [parser]
+(defn p-many [parser]
   (fn [target position]
     (loop [result []
            position' position]
@@ -25,7 +25,7 @@
           (recur (conj result (:result result')) (:new-position result'))
           (->ParseSuccess result position'))))))
 
-(defn choice [& parsers]
+(defn p-choice [& parsers]
   (fn [target position]
     (let [successes (for [parser parsers
                           :let [result (parser target position)]
@@ -48,24 +48,24 @@
         (->ParseSuccess (map :result successes) (last (map :new-position successes)))
         (->ParseFailure nil position)))))
 
-(defn option [parser]
+(defn p-option [parser]
   (fn [target position]
     (let [result (parser target position)]
       (if (= (type result) ParseSuccess)
         result
         (->ParseSuccess nil position)))))
 
-(defn regex [regexp]
+(defn p-regex [regexp]
   (fn [target position]
-    (let [target' (.substring target position)
-          regexp' (if (= (.substring regexp 0 1) "^") regexp (str "^" regexp))
+    (let [regexp' (if (= (.substring regexp 0 1) "^") regexp (str "^" regexp))
+          target' (.substring target position)
           matches (re-find (re-pattern regexp') target')
           result (if (coll? matches) (first matches) matches)]
       (if (not-empty result)
         (->ParseSuccess result (+ position (count result)))
         (->ParseFailure nil position)))))
 
-(defn lazy [func]
+(defn p-lazy [func]
   (fn [target position]
     (let [parser (func)]
       (parser target position))))

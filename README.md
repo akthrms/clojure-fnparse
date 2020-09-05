@@ -4,15 +4,22 @@ Clojure製のパーサコンビネータ
 
 ## 機能
 
-- token
-- many
-- choice
+- p-token
+- p-many
+- p-choice
 - p-seq
-- option
-- regex
-- lazy
+- p-option
+- p-regex
+- p-lazy
 - p-map
 - p-char
+
+## 使用
+
+```
+$ clj -m core "1+2-(3+1-(4))"
+(1 + 2 - (3 + 1 - (4)))
+```
 
 ## 参考
 
