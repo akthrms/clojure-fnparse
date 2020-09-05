@@ -2,20 +2,20 @@
   (:import [fnparse.core ParseSuccess])
   (:require [fnparse.core :refer :all]))
 
-(def number (p-map (p-regex "\\d*") #(Integer/parseInt % 10)))
+(def number (fp-map (fp-regex "\\d*") #(Integer/parseInt % 10)))
 
-(def operator (p-char "+-"))
+(def operator (fp-char "+-"))
 
 (declare expression)
 
-(def parenthesis (p-lazy (fn []
-                           (let [parser (p-seq (p-token "(") expression (p-token ")"))]
-                             (p-map parser #(second %))))))
+(def parenthesis (fp-lazy (fn []
+                           (let [parser (fp-seq (fp-token "(") expression (fp-token ")"))]
+                             (fp-map parser #(second %))))))
 
-(def p-atom (p-choice number parenthesis))
+(def p-atom (fp-choice number parenthesis))
 
-(def expression (p-map (p-seq p-atom (p-many (p-seq operator p-atom)))
-                       #(concat (vector (first %)) (reduce concat [] (second %)))))
+(def expression (fp-map (fp-seq p-atom (fp-many (fp-seq operator p-atom)))
+                        #(concat (vector (first %)) (reduce concat [] (second %)))))
 
 (defn -main [target & _]
   (let [result (expression target 0)]

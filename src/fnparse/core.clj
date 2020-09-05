@@ -8,7 +8,7 @@
   (let [len (count string)]
     (.substring string start (if (< len end) len end))))
 
-(defn p-token [string]
+(defn fp-token [string]
   (let [len (count string)]
     (fn [target position]
       (let [end (+ position len)]
@@ -16,7 +16,7 @@
           (->ParseSuccess string end)
           (->ParseFailure nil position))))))
 
-(defn p-many [parser]
+(defn fp-many [parser]
   (fn [target position]
     (loop [result []
            position' position]
@@ -25,7 +25,7 @@
           (recur (conj result (:result result')) (:new-position result'))
           (->ParseSuccess result position'))))))
 
-(defn p-choice [& parsers]
+(defn fp-choice [& parsers]
   (fn [target position]
     (let [successes (for [parser parsers
                           :let [result (parser target position)]
@@ -35,7 +35,7 @@
         (first successes)
         (->ParseFailure nil position)))))
 
-(defn p-seq [& parsers]
+(defn fp-seq [& parsers]
   (fn [target position]
     (let [position' (atom position)
           successes (for [parser parsers
@@ -48,14 +48,14 @@
         (->ParseSuccess (map :result successes) (last (map :new-position successes)))
         (->ParseFailure nil position)))))
 
-(defn p-option [parser]
+(defn fp-option [parser]
   (fn [target position]
     (let [result (parser target position)]
       (if (= (type result) ParseSuccess)
         result
         (->ParseSuccess nil position)))))
 
-(defn p-regex [regexp]
+(defn fp-regex [regexp]
   (fn [target position]
     (let [regexp' (if (= (.substring regexp 0 1) "^") regexp (str "^" regexp))
           target' (.substring target position)
@@ -65,12 +65,12 @@
         (->ParseSuccess result (+ position (count result)))
         (->ParseFailure nil position)))))
 
-(defn p-lazy [func]
+(defn fp-lazy [func]
   (fn [target position]
     (let [parser (func)]
       (parser target position))))
 
-(defn p-map [parser func]
+(defn fp-map [parser func]
   (fn [target position]
     (let [result (parser target position)]
       (if (= (type result) ParseSuccess)
@@ -80,7 +80,7 @@
 (defn- find-first [func coll]
   (first (drop-while (complement func) coll)))
 
-(defn p-char [string]
+(defn fp-char [string]
   (fn [target position]
     (let [result (substring target position (+ position 1))]
       (if (find-first #(= (first result) (second %)) (map-indexed list string))

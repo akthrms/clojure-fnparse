@@ -4,15 +4,15 @@ Clojure製のパーサコンビネータ
 
 ## 機能
 
-- p-token
-- p-many
-- p-choice
-- p-seq
-- p-option
-- p-regex
-- p-lazy
-- p-map
-- p-char
+- token
+- many
+- choice
+- seq
+- option
+- regex
+- lazy
+- map
+- char
 
 ## 使用例
 
