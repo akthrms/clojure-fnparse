@@ -9,8 +9,8 @@
 (declare fp-expression)
 
 (def fp-parenthesis (fp-lazy (fn []
-                           (let [parser (fp-seq (fp-token "(") fp-expression (fp-token ")"))]
-                             (fp-map parser #(second %))))))
+                               (let [parser (fp-seq (fp-token "(") fp-expression (fp-token ")"))]
+                                 (fp-map parser #(second %))))))
 
 (def fp-atom (fp-choice fp-number fp-parenthesis))
 
