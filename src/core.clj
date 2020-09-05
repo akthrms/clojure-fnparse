@@ -2,23 +2,23 @@
   (:import [fnparse.core ParseSuccess])
   (:require [fnparse.core :refer :all]))
 
-(def number (fp-map (fp-regex "\\d*") #(Integer/parseInt % 10)))
+(def fp-number (fp-map (fp-regex "\\d*") #(Integer/parseInt % 10)))
 
-(def operator (fp-char "+-"))
+(def fp-operator (fp-char "+-"))
 
-(declare expression)
+(declare fp-expression)
 
-(def parenthesis (fp-lazy (fn []
-                           (let [parser (fp-seq (fp-token "(") expression (fp-token ")"))]
+(def fp-parenthesis (fp-lazy (fn []
+                           (let [parser (fp-seq (fp-token "(") fp-expression (fp-token ")"))]
                              (fp-map parser #(second %))))))
 
-(def p-atom (fp-choice number parenthesis))
+(def fp-atom (fp-choice fp-number fp-parenthesis))
 
-(def expression (fp-map (fp-seq p-atom (fp-many (fp-seq operator p-atom)))
-                        #(concat (vector (first %)) (reduce concat [] (second %)))))
+(def fp-expression (fp-map (fp-seq fp-atom (fp-many (fp-seq fp-operator fp-atom)))
+                           #(concat (vector (first %)) (reduce concat [] (second %)))))
 
 (defn -main [target & _]
-  (let [result (expression target 0)]
+  (let [result (fp-expression target 0)]
     (if (= (type result) ParseSuccess)
       (println (:result result))
       (println (str (+ (:new-position result) 1) "文字目でパース失敗")))))
